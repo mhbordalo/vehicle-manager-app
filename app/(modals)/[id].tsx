@@ -1,0 +1,136 @@
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import { useEffect, useState } from 'react';
+import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useThemeColor } from '../../hooks/useThemeColor';
+import api from '../../services/api';
+
+type FormFields = {
+  placa: string;
+  marca: string;
+  modelo: string;
+  ano: string;
+  cor: string;
+};
+
+export default function Edit() {
+  const { id } = useLocalSearchParams();
+  const router = useRouter();
+
+  const textPrimary = useThemeColor({}, 'textPrimary');
+  const background = useThemeColor({}, 'background');
+
+  const [form, setForm] = useState<FormFields>({
+    placa: '',
+    marca: '',
+    modelo: '',
+    ano: '',
+    cor: '',
+  });
+
+  useEffect(() => {
+    if (id) {
+      api.get(`/vehicles/${id}`)
+        .then((res) => {
+          setForm(res.data);
+        })
+        .catch(() => {
+          Alert.alert('Erro ao carregar dados');
+          router.replace('/');
+        });
+    }
+  }, [id, router]);
+
+  function handleChange(key: keyof FormFields, value: string) {
+    setForm((prev) => ({ ...prev, [key]: value }));
+  }
+
+  async function handleSave() {
+    try {
+      await api.put(`/vehicles/${id}`, form);
+      Alert.alert('Sucesso', 'Veículo atualizado');
+      router.replace('/');
+    } catch {
+      Alert.alert('Erro', 'Falha ao salvar');
+    }
+  }
+
+  async function handleDelete() {
+    try {
+      await api.delete(`/vehicles/${id}`);
+      Alert.alert('Removido com sucesso');
+      router.replace('/');
+    } catch {
+      Alert.alert('Erro ao excluir');
+    }
+  }
+
+  const styles = StyleSheet.create({
+    wrapper: {
+      flex: 1,
+      backgroundColor: background,
+    },
+    container: {
+      padding: 20,
+      flexGrow: 1,
+    },
+    title: {
+      fontSize: 22,
+      fontWeight: 'bold',
+      color: textPrimary,
+      marginBottom: 24,
+    },
+    input: {
+      backgroundColor: '#eaeaea',
+      color: '#000',
+      padding: 12,
+      borderRadius: 8,
+      marginBottom: 12,
+    },
+    button: {
+      backgroundColor: '#007bff',
+      paddingVertical: 12,
+      borderRadius: 8,
+      alignItems: 'center',
+      marginTop: 16,
+    },
+    buttonText: {
+      color: '#fff',
+      fontSize: 16,
+      fontWeight: '600',
+    },
+  });
+
+  return (
+    <SafeAreaView style={styles.wrapper} edges={['top']}>
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.title}>Editar Veículo</Text>
+
+        {(Object.keys(form) as (keyof FormFields)[]).map((field) => (
+          <TextInput
+            key={field}
+            placeholder={field.toUpperCase()}
+            placeholderTextColor="#777"
+            style={styles.input}
+            value={form[field]}
+            onChangeText={(text) => handleChange(field, text)}
+          />
+        ))}
+
+        <TouchableOpacity style={styles.button} onPress={handleSave}>
+          <Text style={styles.buttonText}>Salvar Alterações</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={handleDelete}
+          style={[styles.button, { backgroundColor: '#dc3545' }]}
+        >
+          <Text style={styles.buttonText}>Excluir Veículo</Text>
+        </TouchableOpacity>
+      </ScrollView>
+
+      <StatusBar style="light" />
+    </SafeAreaView>
+  );
+}
