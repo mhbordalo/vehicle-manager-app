@@ -160,6 +160,7 @@ export default function Register() {
         </TouchableOpacity>
       </ScrollView>
 
+      {/* Modal de seleção */}
       <Modal
         animationType="slide"
         transparent={true}

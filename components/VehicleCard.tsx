@@ -11,17 +11,11 @@ interface Props {
 function getBrandIcon(brand: string): keyof typeof FontAwesome5.glyphMap {
   switch (brand.toLowerCase()) {
     case 'volkswagen':
-      return 'car-side';
     case 'chevrolet':
-      return 'car';
     case 'fiat':
-      return 'car-alt';
     case 'hyundai':
-      return 'flag-side';
-    case 'Renault':
-      return 'flag';
-    case 'Toyota':
-      return 'flag-alt';
+    case 'renault':
+    case 'toyota':
     default:
       return 'car';
   }
@@ -82,7 +76,7 @@ export default function VehicleCard({ vehicle }: Props) {
           <TouchableOpacity
             onPress={() =>
               router.push({
-                pathname: '/(modals)/edit/[id]',
+                pathname: '/(modals)/[id]',
                 params: { id: String(vehicle.id) },
               })
             }
@@ -95,5 +89,5 @@ export default function VehicleCard({ vehicle }: Props) {
       <Text style={styles.text}>Ano: {vehicle.ano}</Text>
       <Text style={styles.text}>Cor: {vehicle.cor}</Text>
     </View>
-  );
+  )
 }

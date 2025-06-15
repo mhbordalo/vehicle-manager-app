@@ -12,7 +12,7 @@
       "id": "c34g",
       "placa": "JKT9B87",
       "marca": "Chevrolet",
-      "modelo": "Onix",
+      "modelo": "Celta",
       "ano": "2020",
       "cor": "PRETA"
     },
@@ -39,14 +39,6 @@
       "modelo": "Kwid",
       "ano": "2022",
       "cor": "AZUL"
-    },
-    {
-      "id": "g23k",
-      "placa": "VRC8F10",
-      "marca": "Toyota",
-      "modelo": "Etios",
-      "ano": "2017",
-      "cor": "CINZA"
     }
   ]
 }

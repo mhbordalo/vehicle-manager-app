@@ -1,6 +1,7 @@
 import { useIsFocused } from '@react-navigation/native';
 import { useEffect, useState } from 'react';
-import { FlatList, SafeAreaView, StyleSheet, Text, TextInput } from 'react-native';
+import { FlatList, SafeAreaView, StyleSheet, Text, TextInput, View } from 'react-native';
+import ThemeToggleButton from '../../components/ThemeToggleButton';
 import VehicleCard from '../../components/VehicleCard';
 import { useThemeColor } from '../../hooks/useThemeColor';
 import api from '../../services/api';
@@ -47,12 +48,17 @@ export default function Home() {
       paddingHorizontal: 16,
       paddingTop: 24,
     },
+    headerContainer: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 12,
+    },
     heading: {
       fontSize: 22,
       fontWeight: 'bold',
       color: textPrimary,
-      textAlign: 'center',
-      marginBottom: 12,
+      textAlign: 'left',
     },
     search: {
       backgroundColor: '#eaeaea',
@@ -68,7 +74,10 @@ export default function Home() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.heading}>Gerenciamento de Veiculos</Text>
+      <View style={styles.headerContainer}>
+        <Text style={styles.heading}>Gerenciamento de Veiculos</Text>
+        <ThemeToggleButton />
+      </View>
 
       <TextInput
         style={styles.search}
