@@ -1,0 +1,52 @@
+{
+  "vehicles": [
+    {
+      "id": "b12f",
+      "placa": "XYZ1A23",
+      "marca": "Volkswagen",
+      "modelo": "Gol",
+      "ano": "2018",
+      "cor": "PRATA"
+    },
+    {
+      "id": "c34g",
+      "placa": "JKT9B87",
+      "marca": "Chevrolet",
+      "modelo": "Onix",
+      "ano": "2020",
+      "cor": "PRETA"
+    },
+    {
+      "id": "d56h",
+      "placa": "LPU4C66",
+      "marca": "Fiat",
+      "modelo": "Argo",
+      "ano": "2021",
+      "cor": "VERMELHA"
+    },
+    {
+      "id": "e78i",
+      "placa": "MQT2D55",
+      "marca": "Hyundai",
+      "modelo": "HB20",
+      "ano": "2019",
+      "cor": "BRANCA"
+    },
+    {
+      "id": "f90j",
+      "placa": "ASN6E33",
+      "marca": "Renault",
+      "modelo": "Kwid",
+      "ano": "2022",
+      "cor": "AZUL"
+    },
+    {
+      "id": "g23k",
+      "placa": "VRC8F10",
+      "marca": "Toyota",
+      "modelo": "Etios",
+      "ano": "2017",
+      "cor": "CINZA"
+    }
+  ]
+}
