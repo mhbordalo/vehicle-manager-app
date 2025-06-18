@@ -1,20 +1,32 @@
 import { Feather } from '@expo/vector-icons';
-import { TouchableOpacity } from 'react-native';
+import { StyleSheet, TouchableOpacity } from 'react-native';
 import { useTheme } from '../app/contexts/ThemeContext';
-import { useThemeColor } from '../hooks/useThemeColor';
+import { createThemedStyles } from '../constants/Styles';
 
 export default function ThemeToggleButton() {
   const { theme, toggleTheme } = useTheme();
-  const iconColor = useThemeColor({}, 'textPrimary');
+  const styles = createThemedStyles(theme);
 
-  console.log('Tema atual:', theme);
+  const buttonStyles = StyleSheet.create({
+    button: {
+      padding: 8,
+      borderRadius: 20,
+      backgroundColor: styles.card.backgroundColor,
+    },
+    icon: {
+      color: styles.text.color,
+    }
+  });
   
   return (
-    <TouchableOpacity onPress={toggleTheme}>
+    <TouchableOpacity 
+      style={buttonStyles.button}
+      onPress={toggleTheme}
+    >
       <Feather
         name={theme === 'dark' ? 'sun' : 'moon'}
         size={24}
-        color={iconColor}
+        color={buttonStyles.icon.color}
       />
     </TouchableOpacity>
   );
