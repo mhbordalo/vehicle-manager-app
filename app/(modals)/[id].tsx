@@ -2,7 +2,7 @@ import { Feather } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTheme } from '../../app/contexts/ThemeContext';
 import ThemeToggleButton from '../../components/ThemeToggleButton';
@@ -30,6 +30,9 @@ export default function Edit() {
     ano: '',
     cor: '',
   });
+
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -64,62 +67,7 @@ export default function Edit() {
       Alert.alert('Erro', 'ID do veículo não encontrado');
       return;
     }
-
-    // Para web, usar window.confirm
-    if (typeof window !== 'undefined') {
-      const confirmed = window.confirm('Tem certeza que deseja excluir este veículo?');
-      if (!confirmed) return;
-      try {
-        console.log('Confirmado excluir para id:', id);
-        const response = await api.delete(`/vehicles/${id}`);
-        console.log('Resposta do servidor:', response.status, response.data);
-
-        if (response.status === 200 || response.status === 204) {
-          alert('Veículo removido com sucesso');
-          router.replace('/');
-        } else {
-          alert('Não foi possível excluir o veículo');
-        }
-      } catch (error) {
-        console.error('Erro ao excluir:', error);
-        alert('Não foi possível excluir o veículo');
-      }
-      return;
-    }
-
-    // Para mobile, segue o fluxo normal
-    Alert.alert(
-      'Confirmar exclusão',
-      'Tem certeza que deseja excluir este veículo?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Excluir',
-          style: 'destructive',
-          onPress: async () => {
-            console.log('Confirmado excluir para id:', id);
-            try {
-              const response = await api.delete(`/vehicles/${id}`);
-              console.log('Resposta do servidor:', response.status, response.data);
-
-              if (response.status === 200 || response.status === 204) {
-                Alert.alert('Sucesso', 'Veículo removido com sucesso', [
-                  {
-                    text: 'OK',
-                    onPress: () => router.replace('/'),
-                  },
-                ]);
-              } else {
-                Alert.alert('Erro', 'Não foi possível excluir o veículo');
-              }
-            } catch (error) {
-              console.error('Erro ao excluir:', error);
-              Alert.alert('Erro', 'Não foi possível excluir o veículo');
-            }
-          },
-        },
-      ]
-    );
+    setShowConfirm(true);
   };
 
   const pageStyles = StyleSheet.create({
@@ -225,6 +173,85 @@ export default function Edit() {
           <Text style={pageStyles.buttonText}>Excluir Veículo</Text>
         </TouchableOpacity>
       </ScrollView>
+
+      {/* Modal de confirmação customizado */}
+      <Modal
+        visible={showConfirm}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowConfirm(false)}
+      >
+        <View style={{
+          flex: 1,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}>
+          <View style={{
+            backgroundColor: '#fff',
+            padding: 24,
+            borderRadius: 12,
+            width: 300,
+            alignItems: 'center'
+          }}>
+            <Text style={{ fontSize: 18, marginBottom: 16, color: '#333' }}>
+              Tem certeza que deseja excluir este veículo?
+            </Text>
+            <View style={{ flexDirection: 'row', gap: 16 }}>
+              <TouchableOpacity onPress={() => setShowConfirm(false)}>
+                <Text style={{ color: '#007bff', fontSize: 16 }}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={async () => {
+                  setShowConfirm(false);
+                  try {
+                    const response = await api.delete(`/vehicles/${id}`);
+                    if (response.status === 200 || response.status === 204) {
+                      setShowSuccess(true);
+                      setTimeout(() => {
+                        setShowSuccess(false);
+                        router.replace('/');
+                      }, 1200);
+                    } else {
+                      alert('Não foi possível excluir o veículo');
+                    }
+                  } catch (error) {
+                    alert('Não foi possível excluir o veículo');
+                  }
+                }}
+              >
+                <Text style={{ color: '#dc3545', fontSize: 16 }}>Excluir</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Modal de sucesso customizado */}
+      <Modal
+        visible={showSuccess}
+        transparent
+        animationType="fade"
+      >
+        <View style={{
+          flex: 1,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}>
+          <View style={{
+            backgroundColor: '#fff',
+            padding: 24,
+            borderRadius: 12,
+            width: 250,
+            alignItems: 'center'
+          }}>
+            <Text style={{ fontSize: 18, color: '#333' }}>
+              Veículo removido com sucesso!
+            </Text>
+          </View>
+        </View>
+      </Modal>
 
       <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
     </SafeAreaView>
