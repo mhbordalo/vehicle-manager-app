@@ -1,9 +1,12 @@
+import { Feather } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity } from 'react-native';
+import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useThemeColor } from '../../hooks/useThemeColor';
+import { useTheme } from '../../app/contexts/ThemeContext';
+import ThemeToggleButton from '../../components/ThemeToggleButton';
+import { createThemedStyles } from '../../constants/Styles';
 import api from '../../services/api';
 
 type FormFields = {
@@ -17,9 +20,8 @@ type FormFields = {
 export default function Edit() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
-
-  const textPrimary = useThemeColor({}, 'textPrimary');
-  const background = useThemeColor({}, 'background');
+  const { theme } = useTheme();
+  const styles = createThemedStyles(theme);
 
   const [form, setForm] = useState<FormFields>({
     placa: '',
@@ -37,7 +39,7 @@ export default function Edit() {
         })
         .catch(() => {
           Alert.alert('Erro ao carregar dados');
-          router.replace('/');
+          router.back();
         });
     }
   }, [id, router]);
@@ -50,87 +52,138 @@ export default function Edit() {
     try {
       await api.put(`/vehicles/${id}`, form);
       Alert.alert('Sucesso', 'Veículo atualizado');
-      router.replace('/');
+      router.back();
     } catch {
       Alert.alert('Erro', 'Falha ao salvar');
     }
   }
 
   async function handleDelete() {
-    try {
-      await api.delete(`/vehicles/${id}`);
-      Alert.alert('Removido com sucesso');
-      router.replace('/');
-    } catch {
-      Alert.alert('Erro ao excluir');
-    }
+    Alert.alert(
+      'Confirmar exclusão',
+      'Tem certeza que deseja excluir este veículo?',
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+        {
+          text: 'Excluir',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await api.delete(`/vehicles/${id}`);
+              Alert.alert('Removido com sucesso');
+              router.back();
+            } catch {
+              Alert.alert('Erro ao excluir');
+            }
+          },
+        },
+      ]
+    );
   }
 
-  const styles = StyleSheet.create({
+  const pageStyles = StyleSheet.create({
     wrapper: {
       flex: 1,
-      backgroundColor: background,
+      backgroundColor: styles.container.backgroundColor,
     },
     container: {
       padding: 20,
       flexGrow: 1,
     },
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 24,
+    },
+    headerLeft: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 16,
+    },
+    backButton: {
+      padding: 8,
+    },
     title: {
       fontSize: 22,
       fontWeight: 'bold',
-      color: textPrimary,
-      marginBottom: 24,
+      color: styles.text.color,
     },
     input: {
-      backgroundColor: '#eaeaea',
-      color: '#000',
+      backgroundColor: styles.card.backgroundColor,
+      color: styles.text.color,
       padding: 12,
       borderRadius: 8,
       marginBottom: 12,
     },
     button: {
-      backgroundColor: '#007bff',
+      backgroundColor: styles.text.color,
       paddingVertical: 12,
       borderRadius: 8,
       alignItems: 'center',
       marginTop: 16,
     },
     buttonText: {
-      color: '#fff',
+      color: styles.container.backgroundColor,
       fontSize: 16,
       fontWeight: '600',
+    },
+    deleteButton: {
+      backgroundColor: '#dc3545',
+    },
+    placeholderText: {
+      color: styles.text.color,
+      opacity: 0.5,
     },
   });
 
   return (
-    <SafeAreaView style={styles.wrapper} edges={['top']}>
-      <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>Editar Veículo</Text>
+    <SafeAreaView style={pageStyles.wrapper} edges={['top']}>
+      <ScrollView contentContainerStyle={pageStyles.container}>
+        <View style={pageStyles.header}>
+          <View style={pageStyles.headerLeft}>
+            <TouchableOpacity 
+              style={pageStyles.backButton}
+              onPress={() => router.back()}
+            >
+              <Feather 
+                name="arrow-left" 
+                size={24} 
+                color={styles.text.color} 
+              />
+            </TouchableOpacity>
+            <Text style={pageStyles.title}>Editar Veículo</Text>
+          </View>
+          <ThemeToggleButton />
+        </View>
 
         {(Object.keys(form) as (keyof FormFields)[]).map((field) => (
           <TextInput
             key={field}
             placeholder={field.toUpperCase()}
-            placeholderTextColor="#777"
-            style={styles.input}
+            placeholderTextColor={pageStyles.placeholderText.color}
+            style={pageStyles.input}
             value={form[field]}
             onChangeText={(text) => handleChange(field, text)}
           />
         ))}
 
-        <TouchableOpacity style={styles.button} onPress={handleSave}>
-          <Text style={styles.buttonText}>Salvar Alterações</Text>
+        <TouchableOpacity style={pageStyles.button} onPress={handleSave}>
+          <Text style={pageStyles.buttonText}>Salvar Alterações</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           onPress={handleDelete}
-          style={[styles.button, { backgroundColor: '#dc3545' }]}
+          style={[pageStyles.button, pageStyles.deleteButton]}
         >
-          <Text style={styles.buttonText}>Excluir Veículo</Text>
+          <Text style={pageStyles.buttonText}>Excluir Veículo</Text>
         </TouchableOpacity>
       </ScrollView>
 
-      <StatusBar style="light" />
+      <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
     </SafeAreaView>
   );
 }

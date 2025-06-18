@@ -6,7 +6,7 @@
       "marca": "Volkswagen",
       "modelo": "Gol",
       "ano": "2018",
-      "cor": "PRATA"
+      "cor": "Prata"
     },
     {
       "id": "c34g",
@@ -14,7 +14,7 @@
       "marca": "Chevrolet",
       "modelo": "Celta",
       "ano": "2020",
-      "cor": "PRETA"
+      "cor": "Preta"
     },
     {
       "id": "d56h",
@@ -22,7 +22,7 @@
       "marca": "Fiat",
       "modelo": "Argo",
       "ano": "2021",
-      "cor": "VERMELHA"
+      "cor": "Vermelha"
     },
     {
       "id": "e78i",
@@ -30,7 +30,7 @@
       "marca": "Hyundai",
       "modelo": "HB20",
       "ano": "2019",
-      "cor": "BRANCA"
+      "cor": "Branca"
     },
     {
       "id": "f90j",
@@ -38,7 +38,15 @@
       "marca": "Renault",
       "modelo": "Kwid",
       "ano": "2022",
-      "cor": "AZUL"
+      "cor": "Azul"
+    },
+    {
+      "id": "2470",
+      "placa": "LGB1T51",
+      "marca": "Toyota",
+      "modelo": "Etios",
+      "ano": "2020",
+      "cor": "rosa"
     }
   ]
 }

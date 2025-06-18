@@ -1,9 +1,10 @@
 import { useIsFocused } from '@react-navigation/native';
 import { useEffect, useState } from 'react';
 import { FlatList, SafeAreaView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useTheme } from '../../app/contexts/ThemeContext';
 import ThemeToggleButton from '../../components/ThemeToggleButton';
 import VehicleCard from '../../components/VehicleCard';
-import { useThemeColor } from '../../hooks/useThemeColor';
+import { createThemedStyles } from '../../constants/Styles';
 import api from '../../services/api';
 import { Vehicle } from '../../types/vehicle';
 
@@ -11,6 +12,8 @@ export default function Home() {
   const isFocused = useIsFocused();
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [search, setSearch] = useState('');
+  const { theme } = useTheme();
+  const styles = createThemedStyles(theme);
 
   async function fetchVehicles() {
     try {
@@ -37,14 +40,11 @@ export default function Home() {
       v.modelo.toLowerCase().includes(termo)
     );
   });
-  
-  const textPrimary = useThemeColor({}, 'textPrimary');
-  const background = useThemeColor({}, 'background');
 
-  const styles = StyleSheet.create({
+  const pageStyles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: background,
+      backgroundColor: styles.container.backgroundColor,
       paddingHorizontal: 16,
       paddingTop: 24,
     },
@@ -57,12 +57,12 @@ export default function Home() {
     heading: {
       fontSize: 22,
       fontWeight: 'bold',
-      color: textPrimary,
+      color: styles.text.color,
       textAlign: 'left',
     },
     search: {
-      backgroundColor: '#eaeaea',
-      color: '#000',
+      backgroundColor: styles.card.backgroundColor,
+      color: styles.text.color,
       padding: 10,
       borderRadius: 8,
       marginBottom: 12,
@@ -73,16 +73,16 @@ export default function Home() {
   });
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.headerContainer}>
-        <Text style={styles.heading}>Gerenciamento de Veiculos</Text>
+    <SafeAreaView style={pageStyles.container}>
+      <View style={pageStyles.headerContainer}>
+        <Text style={pageStyles.heading}>Gerenciamento de Veiculos</Text>
         <ThemeToggleButton />
       </View>
 
       <TextInput
-        style={styles.search}
+        style={pageStyles.search}
         placeholder="Buscar por marca ou modelo"
-        placeholderTextColor="#999"
+        placeholderTextColor={styles.text.color}
         value={search}
         onChangeText={setSearch}
       />
@@ -91,7 +91,7 @@ export default function Home() {
         data={filtered}
         keyExtractor={(item) => String(item.id)}
         renderItem={({ item }) => <VehicleCard vehicle={item} />}
-        contentContainerStyle={styles.list}
+        contentContainerStyle={pageStyles.list}
       />
     </SafeAreaView>
   );
