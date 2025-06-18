@@ -7,6 +7,7 @@ import { Vehicle } from '../types/vehicle';
 
 interface Props {
   vehicle: Vehicle;
+  onPress?: () => void;
 }
 
 function getBrandIcon(brand: string): keyof typeof FontAwesome5.glyphMap {
@@ -22,7 +23,7 @@ function getBrandIcon(brand: string): keyof typeof FontAwesome5.glyphMap {
   }
 }
 
-export default function VehicleCard({ vehicle }: Props) {
+export default function VehicleCard({ vehicle, onPress }: Props) {
   const router = useRouter();
   const { theme } = useTheme();
   const styles = createThemedStyles(theme);
@@ -67,7 +68,7 @@ export default function VehicleCard({ vehicle }: Props) {
   });
 
   return (
-    <View style={cardStyles.card}>
+    <TouchableOpacity style={cardStyles.card} onPress={onPress}>
       <View style={cardStyles.header}>
         <View style={cardStyles.headerLeft}>
           <FontAwesome5
@@ -81,12 +82,13 @@ export default function VehicleCard({ vehicle }: Props) {
         </View>
         {vehicle.id && (
           <TouchableOpacity
-            onPress={() =>
+            onPress={(e) => {
+              e.stopPropagation();
               router.push({
                 pathname: '/(modals)/[id]',
                 params: { id: String(vehicle.id) },
-              })
-            }
+              });
+            }}
           >
             <Feather name="edit" size={18} color={styles.text.color} />
           </TouchableOpacity>
@@ -95,6 +97,6 @@ export default function VehicleCard({ vehicle }: Props) {
       <Text style={cardStyles.text}>Placa: {vehicle.placa}</Text>
       <Text style={cardStyles.text}>Ano: {vehicle.ano}</Text>
       <Text style={cardStyles.text}>Cor: {vehicle.cor}</Text>
-    </View>
+    </TouchableOpacity>
   );
 }

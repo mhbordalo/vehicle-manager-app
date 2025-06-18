@@ -46,7 +46,15 @@
       "marca": "Toyota",
       "modelo": "Etios",
       "ano": "2020",
-      "cor": "rosa"
+      "cor": "Roxo"
+    },
+    {
+      "id": "59d8",
+      "placa": "JAC1A12",
+      "marca": "Fiat",
+      "modelo": "Palio",
+      "ano": "1999",
+      "cor": "Perola"
     }
   ]
 }

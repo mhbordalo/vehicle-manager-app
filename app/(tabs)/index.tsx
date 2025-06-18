@@ -1,4 +1,5 @@
 import { useIsFocused } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { FlatList, SafeAreaView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useTheme } from '../../app/contexts/ThemeContext';
@@ -9,21 +10,19 @@ import api from '../../services/api';
 import { Vehicle } from '../../types/vehicle';
 
 export default function Home() {
-  const isFocused = useIsFocused();
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [search, setSearch] = useState('');
+  const isFocused = useIsFocused();
   const { theme } = useTheme();
   const styles = createThemedStyles(theme);
+  const router = useRouter();
 
   async function fetchVehicles() {
     try {
       const response = await api.get('/vehicles');
-      const ordered = response.data
-        .filter((v: Vehicle) => v.id !== undefined)
-        .sort((a: Vehicle, b: Vehicle) => (b.id ?? 0) - (a.id ?? 0));
-      setVehicles(ordered);
-    } catch (err) {
-      console.error('Erro ao buscar veículos:', err);
+      setVehicles(response.data);
+    } catch (error) {
+      console.error('Erro ao carregar veículos:', error);
     }
   }
 
@@ -33,66 +32,74 @@ export default function Home() {
     }
   }, [isFocused]);
 
-  const filtered = vehicles.filter((v) => {
-    const termo = search.toLowerCase();
-    return (
-      v.marca.toLowerCase().includes(termo) ||
-      v.modelo.toLowerCase().includes(termo)
-    );
-  });
+  const filtered = vehicles.filter(
+    (vehicle) =>
+      vehicle.marca.toLowerCase().includes(search.toLowerCase()) ||
+      vehicle.modelo.toLowerCase().includes(search.toLowerCase())
+  );
 
   const pageStyles = StyleSheet.create({
-    container: {
+    wrapper: {
       flex: 1,
       backgroundColor: styles.container.backgroundColor,
-      paddingHorizontal: 16,
-      paddingTop: 24,
     },
-    headerContainer: {
+    container: {
+      flex: 1,
+    },
+    header: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',
-      marginBottom: 12,
+      marginBottom: 24,
+      paddingHorizontal: 16,
+      paddingTop: 16,
     },
-    heading: {
+    title: {
       fontSize: 22,
       fontWeight: 'bold',
       color: styles.text.color,
-      textAlign: 'left',
     },
     search: {
       backgroundColor: styles.card.backgroundColor,
-      color: styles.text.color,
-      padding: 10,
+      padding: 12,
       borderRadius: 8,
-      marginBottom: 12,
+      marginBottom: 16,
+      color: styles.text.color,
+      marginHorizontal: 16,
     },
     list: {
-      paddingBottom: 24,
+      padding: 16,
     },
   });
 
   return (
-    <SafeAreaView style={pageStyles.container}>
-      <View style={pageStyles.headerContainer}>
-        <Text style={pageStyles.heading}>Gerenciamento de Veiculos</Text>
+    <SafeAreaView style={pageStyles.wrapper}>
+      <View style={pageStyles.header}>
+        <Text style={pageStyles.title}>Gerenciamento de Veiculos</Text>
         <ThemeToggleButton />
       </View>
 
-      <TextInput
-        style={pageStyles.search}
-        placeholder="Buscar por marca ou modelo"
-        placeholderTextColor={styles.text.color}
-        value={search}
-        onChangeText={setSearch}
-      />
+      <View style={pageStyles.container}>
+        <TextInput
+          placeholder="Buscar veículo..."
+          placeholderTextColor={styles.text.color}
+          style={pageStyles.search}
+          value={search}
+          onChangeText={setSearch}
+        />
 
-      <FlatList
-        data={filtered}
-        keyExtractor={(item) => String(item.id)}
-        renderItem={({ item }) => <VehicleCard vehicle={item} />}
-        contentContainerStyle={pageStyles.list}
-      />
+        <FlatList
+          data={filtered}
+          keyExtractor={(item) => String(item.id)}
+          renderItem={({ item }) => (
+            <VehicleCard
+              vehicle={item}
+              onPress={() => router.push(`/(modals)/${item.id}`)}
+            />
+          )}
+          contentContainerStyle={pageStyles.list}
+        />
+      </View>
     </SafeAreaView>
   );
 }

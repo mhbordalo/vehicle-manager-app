@@ -58,7 +58,7 @@ export default function Edit() {
     }
   }
 
-  async function handleDelete() {
+  const handleDelete = async () => {
     Alert.alert(
       'Confirmar exclusão',
       'Tem certeza que deseja excluir este veículo?',
@@ -73,16 +73,17 @@ export default function Edit() {
           onPress: async () => {
             try {
               await api.delete(`/vehicles/${id}`);
-              Alert.alert('Removido com sucesso');
+              Alert.alert('Sucesso', 'Veículo removido com sucesso');
               router.back();
-            } catch {
-              Alert.alert('Erro ao excluir');
+            } catch (error) {
+              console.error('Erro ao excluir:', error);
+              Alert.alert('Erro', 'Não foi possível excluir o veículo');
             }
           },
         },
       ]
     );
-  }
+  };
 
   const pageStyles = StyleSheet.create({
     wrapper: {
@@ -176,8 +177,8 @@ export default function Edit() {
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={handleDelete}
           style={[pageStyles.button, pageStyles.deleteButton]}
+          onPress={handleDelete}
         >
           <Text style={pageStyles.buttonText}>Excluir Veículo</Text>
         </TouchableOpacity>
