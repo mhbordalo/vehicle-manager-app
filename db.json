@@ -39,22 +39,6 @@
       "modelo": "Kwid",
       "ano": "2022",
       "cor": "Azul"
-    },
-    {
-      "id": "2470",
-      "placa": "LGB1T51",
-      "marca": "Toyota",
-      "modelo": "Etios",
-      "ano": "2020",
-      "cor": "Roxo"
-    },
-    {
-      "id": "59d8",
-      "placa": "JAC1A12",
-      "marca": "Fiat",
-      "modelo": "Palio",
-      "ano": "1999",
-      "cor": "Perola"
     }
   ]
 }

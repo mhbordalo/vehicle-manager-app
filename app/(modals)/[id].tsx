@@ -59,22 +59,59 @@ export default function Edit() {
   }
 
   const handleDelete = async () => {
+    console.log('handleDelete chamado para id:', id);
+    if (!id) {
+      Alert.alert('Erro', 'ID do veículo não encontrado');
+      return;
+    }
+
+    // Para web, usar window.confirm
+    if (typeof window !== 'undefined') {
+      const confirmed = window.confirm('Tem certeza que deseja excluir este veículo?');
+      if (!confirmed) return;
+      try {
+        console.log('Confirmado excluir para id:', id);
+        const response = await api.delete(`/vehicles/${id}`);
+        console.log('Resposta do servidor:', response.status, response.data);
+
+        if (response.status === 200 || response.status === 204) {
+          alert('Veículo removido com sucesso');
+          router.replace('/');
+        } else {
+          alert('Não foi possível excluir o veículo');
+        }
+      } catch (error) {
+        console.error('Erro ao excluir:', error);
+        alert('Não foi possível excluir o veículo');
+      }
+      return;
+    }
+
+    // Para mobile, segue o fluxo normal
     Alert.alert(
       'Confirmar exclusão',
       'Tem certeza que deseja excluir este veículo?',
       [
-        {
-          text: 'Cancelar',
-          style: 'cancel',
-        },
+        { text: 'Cancelar', style: 'cancel' },
         {
           text: 'Excluir',
           style: 'destructive',
           onPress: async () => {
+            console.log('Confirmado excluir para id:', id);
             try {
-              await api.delete(`/vehicles/${id}`);
-              Alert.alert('Sucesso', 'Veículo removido com sucesso');
-              router.back();
+              const response = await api.delete(`/vehicles/${id}`);
+              console.log('Resposta do servidor:', response.status, response.data);
+
+              if (response.status === 200 || response.status === 204) {
+                Alert.alert('Sucesso', 'Veículo removido com sucesso', [
+                  {
+                    text: 'OK',
+                    onPress: () => router.replace('/'),
+                  },
+                ]);
+              } else {
+                Alert.alert('Erro', 'Não foi possível excluir o veículo');
+              }
             } catch (error) {
               console.error('Erro ao excluir:', error);
               Alert.alert('Erro', 'Não foi possível excluir o veículo');
@@ -141,6 +178,8 @@ export default function Edit() {
     },
   });
 
+  console.log('Tela de edição renderizada');
+
   return (
     <SafeAreaView style={pageStyles.wrapper} edges={['top']}>
       <ScrollView contentContainerStyle={pageStyles.container}>
@@ -178,7 +217,10 @@ export default function Edit() {
 
         <TouchableOpacity
           style={[pageStyles.button, pageStyles.deleteButton]}
-          onPress={handleDelete}
+          onPress={() => {
+            console.log('Botão excluir pressionado');
+            handleDelete();
+          }}
         >
           <Text style={pageStyles.buttonText}>Excluir Veículo</Text>
         </TouchableOpacity>
