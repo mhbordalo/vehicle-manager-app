@@ -5,6 +5,7 @@ import { FlatList, SafeAreaView, StyleSheet, Text, TextInput, View } from 'react
 import { useTheme } from '../../app/contexts/ThemeContext';
 import ThemeToggleButton from '../../components/ThemeToggleButton';
 import VehicleCard from '../../components/VehicleCard';
+import Colors from '../../constants/Colors';
 import { createThemedStyles } from '../../constants/Styles';
 import api from '../../services/api';
 import { Vehicle } from '../../types/vehicle';
@@ -16,6 +17,7 @@ export default function Home() {
   const { theme } = useTheme();
   const styles = createThemedStyles(theme);
   const router = useRouter();
+  const dividerColor = Colors[theme].card;
 
   async function fetchVehicles() {
     try {
@@ -32,11 +34,26 @@ export default function Home() {
     }
   }, [isFocused]);
 
-  const filtered = vehicles.filter(
-    (vehicle) =>
-      vehicle.marca.toLowerCase().includes(search.toLowerCase()) ||
-      vehicle.modelo.toLowerCase().includes(search.toLowerCase())
-  );
+  // Função para normalizar texto (remover acentos, espaços extras e deixar minúsculo)
+  function normalize(text: string) {
+    return text
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // remove acentos
+      .replace(/\s+/g, ' ')
+      .trim()
+      .toLowerCase();
+  }
+
+  const filtered = vehicles.filter((vehicle) => {
+    const termo = normalize(search);
+    return (
+      normalize(vehicle.marca).includes(termo) ||
+      normalize(vehicle.modelo).includes(termo) ||
+      normalize(vehicle.placa).includes(termo) ||
+      normalize(vehicle.cor).includes(termo) ||
+      normalize(vehicle.ano).includes(termo)
+    );
+  });
 
   const pageStyles = StyleSheet.create({
     wrapper: {
@@ -67,6 +84,12 @@ export default function Home() {
       color: styles.text.color,
       marginHorizontal: 16,
     },
+    divider: {
+      borderBottomColor: dividerColor,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      marginBottom: 2,
+      marginHorizontal: 0,
+    },
     list: {
       padding: 16,
     },
@@ -75,19 +98,23 @@ export default function Home() {
   return (
     <SafeAreaView style={pageStyles.wrapper}>
       <View style={pageStyles.header}>
-        <Text style={pageStyles.title}>Gerenciamento de Veiculos</Text>
+        <Text style={pageStyles.title}>
+          Gerenciamento de Veiculos
+        </Text>
         <ThemeToggleButton />
       </View>
 
-      <View style={pageStyles.container}>
-        <TextInput
-          placeholder="Buscar veículo..."
-          placeholderTextColor={styles.text.color}
-          style={pageStyles.search}
-          value={search}
-          onChangeText={setSearch}
-        />
+      <TextInput
+        placeholder="Buscar veículo..."
+        placeholderTextColor="#888"
+        style={pageStyles.search}
+        value={search}
+        onChangeText={setSearch}
+      />
 
+      <View style={pageStyles.divider} />
+
+      <View style={pageStyles.container}>
         <FlatList
           data={filtered}
           keyExtractor={(item) => String(item.id)}
