@@ -5,6 +5,7 @@ node_modules/
 
 # Expo
 .expo/
+.expo/types/
 dist/
 web-build/
 expo-env.d.ts
@@ -36,4 +37,10 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
-app-example
+# Arquivos e pastas temporários
+app-example/
+scripts/reset-project.js
+.expo/types/router.d.ts
+
+# Outros
+*.log

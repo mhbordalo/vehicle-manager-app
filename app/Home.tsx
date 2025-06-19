@@ -1,14 +1,13 @@
-import { useIsFocused } from '@react-navigation/native';
-import { useRouter } from 'expo-router';
+import { useIsFocused, useNavigation } from '@react-navigation/native';
 import { useEffect, useState } from 'react';
 import { FlatList, SafeAreaView, StyleSheet, Text, TextInput, View } from 'react-native';
-import { useTheme } from '../../app/contexts/ThemeContext';
-import ThemeToggleButton from '../../components/ThemeToggleButton';
-import VehicleCard from '../../components/VehicleCard';
-import Colors from '../../constants/Colors';
-import { createThemedStyles } from '../../constants/Styles';
-import api from '../../services/api';
-import { Vehicle } from '../../types/vehicle';
+import ThemeToggleButton from '../components/ThemeToggleButton';
+import VehicleCard from '../components/VehicleCard';
+import Colors from '../constants/Colors';
+import { createThemedStyles } from '../constants/Styles';
+import api from '../services/api';
+import { Vehicle } from '../types/vehicle';
+import { useTheme } from './contexts/ThemeContext';
 
 export default function Home() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
@@ -16,7 +15,7 @@ export default function Home() {
   const isFocused = useIsFocused();
   const { theme } = useTheme();
   const styles = createThemedStyles(theme);
-  const router = useRouter();
+  const navigation = useNavigation();
   const dividerColor = Colors[theme].card;
 
   async function fetchVehicles() {
@@ -34,11 +33,10 @@ export default function Home() {
     }
   }, [isFocused]);
 
-  // Função para normalizar texto (remover acentos, espaços extras e deixar minúsculo)
   function normalize(text: string) {
     return text
       .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '') // remove acentos
+      .replace(/[\u0300-\u036f]/g, '')
       .replace(/\s+/g, ' ')
       .trim()
       .toLowerCase();
@@ -121,7 +119,7 @@ export default function Home() {
           renderItem={({ item }) => (
             <VehicleCard
               vehicle={item}
-              onPress={() => router.push(`/(modals)/${item.id}`)}
+              onPress={() => navigation.navigate('EditVehicle', { id: item.id })}
             />
           )}
           contentContainerStyle={pageStyles.list}
@@ -129,4 +127,4 @@ export default function Home() {
       </View>
     </SafeAreaView>
   );
-}
+} 

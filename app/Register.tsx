@@ -1,16 +1,23 @@
-import { useRouter } from 'expo-router';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
-import { Alert, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, } from 'react-native';
+import { Alert, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTheme } from '../../app/contexts/ThemeContext';
-import ThemeToggleButton from '../../components/ThemeToggleButton';
-import { brands } from '../../constants/Brands';
-import { createThemedStyles } from '../../constants/Styles';
-import api from '../../services/api';
+import ThemeToggleButton from '../components/ThemeToggleButton';
+import { brands } from '../constants/Brands';
+import { createThemedStyles } from '../constants/Styles';
+import api from '../services/api';
+import { useTheme } from './contexts/ThemeContext';
+
+type RootStackParamList = {
+  Login: undefined;
+  Main: undefined;
+  EditVehicle: { id: string };
+};
 
 export default function Register() {
-  const router = useRouter();
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const { theme } = useTheme();
   const styles = createThemedStyles(theme);
   
@@ -24,22 +31,45 @@ export default function Register() {
 
   const [modalVisible, setModalVisible] = useState(false);
   const [showError, setShowError] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
   function handleChange(key: keyof typeof form, value: string) {
     setForm({ ...form, [key]: value });
   }
 
+  function validateAno(ano: string) {
+    return /^\d{4}$/.test(ano);
+  }
+
+  function validatePlaca(placa: string) {
+    // Aceita ABC1D23, ABC1234, ABC-1234 (tudo maiúsculo)
+    const regex = /^([A-Z]{3}\d{1}[A-Z]{1}\d{2}|[A-Z]{3}\d{4}|[A-Z]{3}-\d{4})$/;
+    return regex.test(placa.toUpperCase());
+  }
+
   async function handleSubmit() {
-    const { placa, marca, modelo, ano, cor } = form;
+    let { placa, marca, modelo, ano, cor } = form;
     if (!placa || !marca || !modelo || !ano || !cor) {
+      setErrorMsg('Preencha todos os campos!');
       setShowError(true);
       return;
     }
-
+    if (!validatePlaca(placa)) {
+      setErrorMsg('Placa inválida! Use: ABC1D23, ABC1234 ou ABC-1234');
+      setShowError(true);
+      return;
+    }
+    if (!validateAno(ano)) {
+      setErrorMsg('Ano inválido! ex: 2025');
+      setShowError(true);
+      return;
+    }
+    // Sempre salvar placa em maiúsculo
+    placa = placa.toUpperCase();
     try {
-      await api.post('/vehicles', form);
+      await api.post('/vehicles', { placa, marca, modelo, ano, cor });
       Alert.alert('Sucesso', 'Veículo cadastrado!');
-      router.replace('/');
+      navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
     } catch {
       Alert.alert('Erro ao cadastrar');
     }
@@ -135,7 +165,7 @@ export default function Register() {
           placeholder="Placa"
           placeholderTextColor={pageStyles.placeholderText.color}
           value={form.placa}
-          onChangeText={(text) => handleChange('placa', text)}
+          onChangeText={(text) => handleChange('placa', text.toUpperCase())}
         />
 
         <TouchableOpacity
@@ -225,7 +255,7 @@ export default function Register() {
             alignItems: 'center'
           }}>
             <Text style={{ fontSize: 18, color: '#333', marginBottom: 16 }}>
-              Preencha todos os campos!
+              {errorMsg || 'Preencha todos os campos!'}
             </Text>
             <TouchableOpacity
               onPress={() => setShowError(false)}
@@ -245,4 +275,4 @@ export default function Register() {
       <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
     </SafeAreaView>
   );
-}
+} 

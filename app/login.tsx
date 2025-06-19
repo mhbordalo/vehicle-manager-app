@@ -1,23 +1,45 @@
-import { useRouter } from 'expo-router';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import ThemeToggleButton from '../components/ThemeToggleButton';
 import { createThemedStyles } from '../constants/Styles';
 import { useTheme } from './contexts/ThemeContext';
 
+type RootStackParamList = {
+  Login: undefined;
+  Main: undefined;
+  EditVehicle: { id: string };
+};
+
 export default function Login() {
-  const router = useRouter();
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const { theme } = useTheme();
   const styles = createThemedStyles(theme);
+  const [showError, setShowError] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+
+  function validateEmail(email: string) {
+    // Regex para validação de e-mail
+    return /^\S+@\S+\.\S+$/.test(email);
+  }
 
   function handleLogin() {
-    if (email && senha) {
-      router.replace('/');
+    if (!email || !senha) {
+      setErrorMsg('Preencha todos os campos!');
+      setShowError(true);
+      return;
     }
+    if (!validateEmail(email)) {
+      setErrorMsg('E-mail inválido!');
+      setShowError(true);
+      return;
+    }
+    navigation.navigate('Main');
   }
 
   const pageStyles = StyleSheet.create({
@@ -91,6 +113,43 @@ export default function Login() {
         <Text style={pageStyles.buttonText}>Entrar</Text>
       </TouchableOpacity>
 
+      {/* Modal de erro customizado */}
+      <Modal
+        visible={showError}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowError(false)}
+      >
+        <View style={{
+          flex: 1,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}>
+          <View style={{
+            backgroundColor: '#fff',
+            padding: 24,
+            borderRadius: 12,
+            width: 250,
+            alignItems: 'center'
+          }}>
+            <Text style={{ fontSize: 18, color: '#333', marginBottom: 16 }}>
+              {errorMsg}
+            </Text>
+            <TouchableOpacity
+              onPress={() => setShowError(false)}
+              style={{
+                backgroundColor: '#007bff',
+                paddingVertical: 10,
+                paddingHorizontal: 24,
+                borderRadius: 8,
+              }}
+            >
+              <Text style={{ color: '#fff', fontSize: 16, fontWeight: 'bold' }}>OK</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
       <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
     </SafeAreaView>
   );

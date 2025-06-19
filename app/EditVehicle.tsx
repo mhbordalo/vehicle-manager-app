@@ -1,29 +1,23 @@
 import { Feather } from '@expo/vector-icons';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import { Alert, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useTheme } from '../../app/contexts/ThemeContext';
-import ThemeToggleButton from '../../components/ThemeToggleButton';
-import { createThemedStyles } from '../../constants/Styles';
-import api from '../../services/api';
+import ThemeToggleButton from '../components/ThemeToggleButton';
+import { createThemedStyles } from '../constants/Styles';
+import api from '../services/api';
+import { useTheme } from './contexts/ThemeContext';
 
-type FormFields = {
-  placa: string;
-  marca: string;
-  modelo: string;
-  ano: string;
-  cor: string;
-};
-
-export default function Edit() {
-  const { id } = useLocalSearchParams();
-  const router = useRouter();
+export default function EditVehicle() {
+  const navigation = useNavigation();
+  const route = useRoute();
+  // @ts-ignore
+  const { id } = route.params || {};
   const { theme } = useTheme();
   const styles = createThemedStyles(theme);
 
-  const [form, setForm] = useState<FormFields>({
+  const [form, setForm] = useState({
     placa: '',
     marca: '',
     modelo: '',
@@ -33,6 +27,8 @@ export default function Edit() {
 
   const [showConfirm, setShowConfirm] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showError, setShowError] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
   useEffect(() => {
     if (id) {
@@ -42,27 +38,55 @@ export default function Edit() {
         })
         .catch(() => {
           Alert.alert('Erro ao carregar dados');
-          router.back();
+          navigation.goBack();
         });
     }
-  }, [id, router]);
+  }, [id, navigation]);
 
-  function handleChange(key: keyof FormFields, value: string) {
+  function handleChange(key: keyof typeof form, value: string) {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
+  function validateAno(ano: string) {
+    return /^\d{4}$/.test(ano);
+  }
+
+  function validatePlaca(placa: string) {
+    // Aceita ABC1D23, ABC1234, ABC-1234 (tudo maiúsculo)
+    const regex = /^([A-Z]{3}\d{1}[A-Z]{1}\d{2}|[A-Z]{3}\d{4}|[A-Z]{3}-\d{4})$/;
+    return regex.test(placa.toUpperCase());
+  }
+
   async function handleSave() {
+    // Validação obrigatória dos campos
+    let { placa, marca, modelo, ano, cor } = form;
+    if (!placa || !marca || !modelo || !ano || !cor) {
+      setErrorMsg('Preencha todos os campos!');
+      setShowError(true);
+      return;
+    }
+    if (!validatePlaca(placa)) {
+      setErrorMsg('Placa inválida! Use: ABC1D23, ABC1234 ou ABC-1234');
+      setShowError(true);
+      return;
+    }
+    if (!validateAno(ano)) {
+      setErrorMsg('Ano inválido! ex: 2025');
+      setShowError(true);
+      return;
+    }
+    // Sempre salvar placa em maiúsculo
+    placa = placa.toUpperCase();
     try {
-      await api.put(`/vehicles/${id}`, form);
+      await api.put(`/vehicles/${id}`, { placa, marca, modelo, ano, cor });
       Alert.alert('Sucesso', 'Veículo atualizado');
-      router.back();
+      navigation.goBack();
     } catch {
       Alert.alert('Erro', 'Falha ao salvar');
     }
   }
 
   const handleDelete = async () => {
-    console.log('handleDelete chamado para id:', id);
     if (!id) {
       Alert.alert('Erro', 'ID do veículo não encontrado');
       return;
@@ -77,7 +101,6 @@ export default function Edit() {
     },
     container: {
       padding: 20,
-      flexGrow: 1,
     },
     header: {
       flexDirection: 'row',
@@ -88,10 +111,10 @@ export default function Edit() {
     headerLeft: {
       flexDirection: 'row',
       alignItems: 'center',
-      gap: 16,
+      gap: 8,
     },
     backButton: {
-      padding: 8,
+      marginRight: 12,
     },
     title: {
       fontSize: 22,
@@ -103,14 +126,15 @@ export default function Edit() {
       color: styles.text.color,
       padding: 12,
       borderRadius: 8,
-      marginBottom: 12,
+      marginBottom: 16,
+      fontSize: 16,
     },
     button: {
       backgroundColor: styles.text.color,
       paddingVertical: 12,
       borderRadius: 8,
       alignItems: 'center',
-      marginTop: 16,
+      marginTop: 12,
     },
     buttonText: {
       color: styles.container.backgroundColor,
@@ -119,14 +143,13 @@ export default function Edit() {
     },
     deleteButton: {
       backgroundColor: '#dc3545',
+      marginTop: 8,
     },
     placeholderText: {
       color: styles.text.color,
       opacity: 0.5,
     },
   });
-
-  console.log('Tela de edição renderizada');
 
   return (
     <SafeAreaView style={pageStyles.wrapper} edges={['top']}>
@@ -135,7 +158,7 @@ export default function Edit() {
           <View style={pageStyles.headerLeft}>
             <TouchableOpacity 
               style={pageStyles.backButton}
-              onPress={() => router.back()}
+              onPress={() => navigation.goBack()}
             >
               <Feather 
                 name="arrow-left" 
@@ -148,14 +171,18 @@ export default function Edit() {
           <ThemeToggleButton />
         </View>
 
-        {(Object.keys(form) as (keyof FormFields)[]).map((field) => (
+        {(Object.keys(form) as (keyof typeof form)[]).map((field) => (
           <TextInput
             key={field}
             placeholder={field.toUpperCase()}
             placeholderTextColor={pageStyles.placeholderText.color}
             style={pageStyles.input}
             value={form[field]}
-            onChangeText={(text) => handleChange(field, text)}
+            onChangeText={(text) =>
+              field === 'placa'
+                ? handleChange('placa', text.toUpperCase())
+                : handleChange(field, text)
+            }
           />
         ))}
 
@@ -165,10 +192,7 @@ export default function Edit() {
 
         <TouchableOpacity
           style={[pageStyles.button, pageStyles.deleteButton]}
-          onPress={() => {
-            console.log('Botão excluir pressionado');
-            handleDelete();
-          }}
+          onPress={handleDelete}
         >
           <Text style={pageStyles.buttonText}>Excluir Veículo</Text>
         </TouchableOpacity>
@@ -191,52 +215,51 @@ export default function Edit() {
             backgroundColor: '#fff',
             padding: 24,
             borderRadius: 12,
-            width: 300,
+            width: 250,
             alignItems: 'center'
           }}>
-            <Text style={{ fontSize: 18, marginBottom: 16, color: '#333' }}>
-              Tem certeza que deseja excluir este veículo?
+            <Text style={{ fontSize: 18, color: '#333', marginBottom: 16 }}>
+              Deseja mesmo excluir?
             </Text>
-            <View style={{ flexDirection: 'row', gap: 16 }}>
-              <TouchableOpacity
-                onPress={() => setShowConfirm(false)}
-                style={{
-                  backgroundColor: '#f0f0f0',
-                  paddingVertical: 10,
-                  paddingHorizontal: 24,
-                  borderRadius: 8,
-                }}
-              >
-                <Text style={{ color: '#333', fontSize: 16, fontWeight: 'bold' }}>Cancelar</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={async () => {
-                  setShowConfirm(false);
-                  try {
-                    const response = await api.delete(`/vehicles/${id}`);
-                    if (response.status === 200 || response.status === 204) {
-                      setShowSuccess(true);
-                      setTimeout(() => {
-                        setShowSuccess(false);
-                        router.replace('/');
-                      }, 1200);
-                    } else {
-                      alert('Não foi possível excluir o veículo');
-                    }
-                  } catch (error) {
+            <TouchableOpacity
+              onPress={async () => {
+                setShowConfirm(false);
+                try {
+                  const response = await api.delete(`/vehicles/${id}`);
+                  if (response.status === 200 || response.status === 204) {
+                    setShowSuccess(true);
+                    setTimeout(() => {
+                      setShowSuccess(false);
+                      navigation.goBack();
+                    }, 1200);
+                  } else {
                     alert('Não foi possível excluir o veículo');
                   }
-                }}
-                style={{
-                  backgroundColor: '#dc3545',
-                  paddingVertical: 10,
-                  paddingHorizontal: 24,
-                  borderRadius: 8,
-                }}
-              >
-                <Text style={{ color: '#fff', fontSize: 16, fontWeight: 'bold' }}>Excluir</Text>
-              </TouchableOpacity>
-            </View>
+                } catch (error) {
+                  alert('Não foi possível excluir o veículo');
+                }
+              }}
+              style={{
+                backgroundColor: '#dc3545',
+                paddingVertical: 10,
+                paddingHorizontal: 24,
+                borderRadius: 8,
+              }}
+            >
+              <Text style={{ color: '#fff', fontSize: 16, fontWeight: 'bold' }}>Excluir</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setShowConfirm(false)}
+              style={{
+                marginTop: 12,
+                paddingVertical: 10,
+                paddingHorizontal: 24,
+                borderRadius: 8,
+                backgroundColor: '#ccc',
+              }}
+            >
+              <Text style={{ color: '#333', fontSize: 16, fontWeight: 'bold' }}>Cancelar</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -267,7 +290,45 @@ export default function Edit() {
         </View>
       </Modal>
 
+      {/* Modal de erro customizado */}
+      <Modal
+        visible={showError}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowError(false)}
+      >
+        <View style={{
+          flex: 1,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}>
+          <View style={{
+            backgroundColor: '#fff',
+            padding: 24,
+            borderRadius: 12,
+            width: 250,
+            alignItems: 'center'
+          }}>
+            <Text style={{ fontSize: 18, color: '#333', marginBottom: 16 }}>
+              {errorMsg || 'Preencha todos os campos!'}
+            </Text>
+            <TouchableOpacity
+              onPress={() => setShowError(false)}
+              style={{
+                backgroundColor: '#007bff',
+                paddingVertical: 10,
+                paddingHorizontal: 24,
+                borderRadius: 8,
+              }}
+            >
+              <Text style={{ color: '#fff', fontSize: 16, fontWeight: 'bold' }}>OK</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
       <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
     </SafeAreaView>
   );
-}
+} 

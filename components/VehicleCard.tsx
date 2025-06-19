@@ -1,5 +1,4 @@
 import { Feather, FontAwesome5 } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useTheme } from '../app/contexts/ThemeContext';
 import { createThemedStyles } from '../constants/Styles';
@@ -24,7 +23,6 @@ function getBrandIcon(brand: string): keyof typeof FontAwesome5.glyphMap {
 }
 
 export default function VehicleCard({ vehicle, onPress }: Props) {
-  const router = useRouter();
   const { theme } = useTheme();
   const styles = createThemedStyles(theme);
   
@@ -84,10 +82,7 @@ export default function VehicleCard({ vehicle, onPress }: Props) {
           <TouchableOpacity
             onPress={(e) => {
               e.stopPropagation();
-              router.push({
-                pathname: '/(modals)/[id]',
-                params: { id: String(vehicle.id) },
-              });
+              onPress && onPress();
             }}
           >
             <Feather name="edit" size={18} color={styles.text.color} />
