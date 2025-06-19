@@ -23,6 +23,7 @@ export default function Register() {
   });
 
   const [modalVisible, setModalVisible] = useState(false);
+  const [showError, setShowError] = useState(false);
 
   function handleChange(key: keyof typeof form, value: string) {
     setForm({ ...form, [key]: value });
@@ -31,7 +32,8 @@ export default function Register() {
   async function handleSubmit() {
     const { placa, marca, modelo, ano, cor } = form;
     if (!placa || !marca || !modelo || !ano || !cor) {
-      return Alert.alert('Preencha todos os campos!');
+      setShowError(true);
+      return;
     }
 
     try {
@@ -198,6 +200,43 @@ export default function Register() {
             ))}
             <TouchableOpacity onPress={() => setModalVisible(false)}>
               <Text style={pageStyles.cancelText}>Cancelar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={showError}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowError(false)}
+      >
+        <View style={{
+          flex: 1,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}>
+          <View style={{
+            backgroundColor: '#fff',
+            padding: 24,
+            borderRadius: 12,
+            width: 250,
+            alignItems: 'center'
+          }}>
+            <Text style={{ fontSize: 18, color: '#333', marginBottom: 16 }}>
+              Preencha todos os campos!
+            </Text>
+            <TouchableOpacity
+              onPress={() => setShowError(false)}
+              style={{
+                backgroundColor: '#007bff',
+                paddingVertical: 10,
+                paddingHorizontal: 24,
+                borderRadius: 8,
+              }}
+            >
+              <Text style={{ color: '#fff', fontSize: 16, fontWeight: 'bold' }}>OK</Text>
             </TouchableOpacity>
           </View>
         </View>
