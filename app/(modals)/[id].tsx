@@ -198,8 +198,16 @@ export default function Edit() {
               Tem certeza que deseja excluir este veículo?
             </Text>
             <View style={{ flexDirection: 'row', gap: 16 }}>
-              <TouchableOpacity onPress={() => setShowConfirm(false)}>
-                <Text style={{ color: '#007bff', fontSize: 16 }}>Cancelar</Text>
+              <TouchableOpacity
+                onPress={() => setShowConfirm(false)}
+                style={{
+                  backgroundColor: '#f0f0f0',
+                  paddingVertical: 10,
+                  paddingHorizontal: 24,
+                  borderRadius: 8,
+                }}
+              >
+                <Text style={{ color: '#333', fontSize: 16, fontWeight: 'bold' }}>Cancelar</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={async () => {
@@ -219,8 +227,14 @@ export default function Edit() {
                     alert('Não foi possível excluir o veículo');
                   }
                 }}
+                style={{
+                  backgroundColor: '#dc3545',
+                  paddingVertical: 10,
+                  paddingHorizontal: 24,
+                  borderRadius: 8,
+                }}
               >
-                <Text style={{ color: '#dc3545', fontSize: 16 }}>Excluir</Text>
+                <Text style={{ color: '#fff', fontSize: 16, fontWeight: 'bold' }}>Excluir</Text>
               </TouchableOpacity>
             </View>
           </View>
