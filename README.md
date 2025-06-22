@@ -93,6 +93,69 @@ Este projeto é um aplicativo mobile e web desenvolvido em **React Native** com 
       - Ctrl+Shift+M para ativar emulação de dispositivo
    - Para mobile: use o app Expo Go ou emulador
 
+## Telas
+
+1. **Tela de login:**
+
+   ![Login](assets/images/login.png)
+
+2. **Tela de listagem:**
+
+   ![Show](assets/images/show.png)
+
+3. **Tela de cadastro:**
+
+   ![Create](assets/images/create.png)
+
+4. **Tela de edição:**
+
+   ![Edit/Update](assets/images/edit.png)
+
+5. **Tela em dark mode:**
+
+   ![DarkMode](assets/images/dark-mode.png)
+
+## Schema JSON Server
+
+```bash
+{
+  "vehicles": [
+    {
+      "id": "b12f",
+      "placa": "XYZ1A23",
+      "marca": "Volkswagen",
+      "modelo": "Gol",
+      "ano": "2018",
+      "cor": "Prata"
+    },
+    {
+      "id": "c34g",
+      "placa": "JKT9B87",
+      "marca": "Chevrolet",
+      "modelo": "Celta",
+      "ano": "2020",
+      "cor": "Preta"
+    },
+    {
+      "id": "d56h",
+      "placa": "LPU4C66",
+      "marca": "Fiat",
+      "modelo": "Argo",
+      "ano": "2021",
+      "cor": "Vermelha"
+    },
+    {
+      "id": "e78i",
+      "placa": "MQT2D55",
+      "marca": "Hyundai",
+      "modelo": "HB20",
+      "ano": "2019",
+      "cor": "Branca"
+    }
+  ]
+}
+```
+
 ---
 
-> Desenvolvido para PosTech FIAP - Pós-graduação Full Stack Development
+> Desenvolvido para PosTech FIAP - Full Stack Development - Mobile
