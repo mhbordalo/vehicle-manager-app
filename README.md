@@ -107,9 +107,9 @@ Este projeto é um aplicativo mobile e web desenvolvido em **React Native** com 
 
    ![Create](assets/images/create.png)
 
-4. **Tela de edição:**
+4. **Tela de edição e exclusão:**
 
-   ![Edit/Update](assets/images/edit.png)
+   ![Edit/Update/Delete](assets/images/edit.png)
 
 5. **Tela em dark mode:**
 
