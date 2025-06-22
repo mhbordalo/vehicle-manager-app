@@ -4,9 +4,9 @@ Este projeto é um aplicativo mobile e web desenvolvido em **React Native** com 
 
 ## Visão Geral
 
-- **Tecnologias:** React Native, Expo, React Navigation, TypeScript, Axios, JSON Server
-- **Funcionalidades:** CRUD de veículos, tema claro/escuro, navegação por abas e modais, feedback visual via modais customizados, busca robusta, validação obrigatória, feedback visual universal
-- **Ambientes:** Suporte a web e mobile (Android/iOS)
+- **Tecnologias:** React Native, Expo, React Navigation, TypeScript, Axios, JSON Server,
+- **Funcionalidades:** CRUD de veículos, tema claro/escuro, navegação por abas e modais, feedback visual via modais customizados, busca robusta, validação obrigatória, feedback visual universal,
+- **Ambientes:** Suporte a web e mobile (Android/iOS).
 
 ## Arquitetura e Estrutura
 
@@ -48,7 +48,7 @@ Este projeto é um aplicativo mobile e web desenvolvido em **React Native** com 
 - **Validação de e-mail:** No login, exige formato de e-mail válido,
 - **Feedback visual:** Modais customizados para sucesso, erro e confirmação, compatíveis com web e mobile,
 - **Tema global:** Alternância clara/escura em todo o app, inclusive na tab bar,
-- **Acessibilidade:** Uso de SafeAreaView, contraste de cores, botões grandes e textos legíveis
+- **Acessibilidade:** Uso de SafeAreaView, contraste de cores, botões grandes e textos legíveis.
 
 ## Dependências Principais
 
